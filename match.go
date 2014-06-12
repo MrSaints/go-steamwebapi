@@ -160,10 +160,10 @@ func (this PlayerDetails) GetPosition() (isDire bool, position int) {
 
 func (this MatchDetails) GetPosition(accountID int) (isDire bool, position int) {
     isDire, position = false, 0
-    // IMPL QUICK BOOL SEARCH
     for _, player := range this.Players {
         if accountID == player.Id {
-            isDire, position = player.GetPosition() 
+            isDire, position = player.GetPosition()
+            return
         }
     }
     return
