@@ -23,10 +23,10 @@ func GetLeagueListing() (leagues Leagues) {
     return
 }
 
-func GetTournamentPrizePool(leagueID int) interface{} {
+func GetTournamentPrizePool(leagueID int) float64 {
     result := DotaAPI("GetTournamentPrizePool", false).GetResult()
     var data map[string]interface{}
     err := json.Unmarshal(result.Data, &data)
     pError(err)
-    return data["prize_pool"]
+    return data["prize_pool"].(float64)
 }
