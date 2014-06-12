@@ -8,28 +8,50 @@ import (
     "github.com/ugorji/go/codec"
 )
 
+func Dump(fileName string, data interface{}) (err error) {
+    var (
+        packed []byte
+        handle codec.MsgpackHandle
+    )
+    encoder := codec.NewEncoderBytes(&packed, &handle)
+    encoder.Encode(data)
+
+    err = ioutil.WriteFile(fileName, packed, 0644)
+    return
+}
+
 func GetHeroes(c *cli.Context) {
     heroes := godoto.GetHeroes()
 
     if c.Bool("msgpack") {
-        var (
-            packed []byte
-            handle codec.MsgpackHandle
-        )
-        encoder := codec.NewEncoderBytes(&packed, &handle)
-        encoder.Encode(heroes)
-
-        file_error := ioutil.WriteFile("heroes.bin", packed, 0644)
+        file_error := Dump("heroes.bin", heroes.Heroes)
         if file_error != nil {
             panic(file_error)
         }
 
         log.Println("Encoded and dumped list of heroes in MsgPack.")
     } else {
-        log.Print(heroes)
+        log.Println(heroes)
     }
 
     log.Printf("Total heroes: %v", heroes.Count)
+}
+
+func GetLeagueListing(c *cli.Context) {
+    listing := godoto.GetLeagueListing()
+
+    if c.Bool("msgpack") {
+        file_error := Dump("leagues.bin", listing.Leagues)
+        if file_error != nil {
+            panic(file_error)
+        }
+
+        log.Println("Encoded and dumped list of leagues in MsgPack.")
+    } else {
+        log.Println(listing)
+    }
+
+    log.Printf("Total leagues: %v", len(listing.Leagues))
 }
 
 func GetMatchHistory(c *cli.Context) {
@@ -62,7 +84,6 @@ func GetMatchHistory(c *cli.Context) {
 
         log.Println(result)
     } else {
-        log.Print(history)
+        log.Println(history)
     }
-
 }
