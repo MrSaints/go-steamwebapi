@@ -133,10 +133,19 @@ func (this Match) GetDetails() MatchDetails {
 }
 
 func (this MatchHistory) GetDetails() (matches Matches) {
+    done := make(chan bool)
     history := this.Matches
-    for _, element := range history {
-        matches = append(matches, element.GetDetails())
+    total := len(history) - 1
+
+    for i, element := range history {
+        go func(i int, element Match) {
+            matches = append(matches, element.GetDetails())
+            if i == total {
+                done <- true
+            }
+        }(i, element)
     }
+    <-done
     return
 }
 
