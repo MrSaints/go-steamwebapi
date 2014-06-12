@@ -45,7 +45,7 @@ func GetMatchHistory(c *cli.Context) {
                 if match.RadiantWin {
                     result += "R"
                 } else {
-                    result += "L"
+                    result += "D"
                 }
                 continue
             }
