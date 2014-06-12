@@ -54,6 +54,11 @@ func GetLeagueListing(c *cli.Context) {
     log.Printf("Total leagues: %v", len(listing.Leagues))
 }
 
+func GetTournamentPrizePool(c *cli.Context) {
+    prize := godoto.GetTournamentPrizePool(c.Int("leagueID"))
+    log.Printf("Prize pool: %v", prize)
+}
+
 func GetMatchHistory(c *cli.Context) {
     accountID := c.Int("accountId")
     history := godoto.GetMatchHistory(accountID, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))

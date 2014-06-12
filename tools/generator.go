@@ -26,6 +26,15 @@ func main() {
             Action: GetLeagueListing,
         },
         {
+            Name: "GetTournamentPrizePool",
+            ShortName: "pp",
+            Usage: "Returns the current prizepool for specific tournaments",
+            Flags: []cli.Flag{
+                cli.IntFlag{"id", 600, "A list of league IDs can be found via the GetLeagueListing method"},
+            },
+            Action: GetTournamentPrizePool,
+        },
+        {
             Name: "GetMatchHistory",
             ShortName: "mh",
             Usage: "Returns a list of matches, filterable by various parameters",
