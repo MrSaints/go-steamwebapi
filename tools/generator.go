@@ -56,6 +56,7 @@ func main() {
 
     app := cli.NewApp()
     app.Name = "GoDoto"
+    app.Version = "1.0.0"
     app.Commands = commands
     app.Run(os.Args)
     os.Exit(0)
