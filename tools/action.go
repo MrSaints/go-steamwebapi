@@ -4,7 +4,7 @@ import (
     "io/ioutil"
     "log"
     "github.com/codegangsta/cli"
-    "github.com/MrSaints/godoto"
+    "github.com/mrsaints/godoto"
     "github.com/ugorji/go/codec"
 )
 
@@ -24,7 +24,7 @@ func GetHeroes(c *cli.Context) {
     heroes := godoto.GetHeroes()
 
     if c.Bool("msgpack") {
-        file_error := Dump("heroes.bin", heroes.Heroes)
+        file_error := Dump("heroes.bin", heroes)
         if file_error != nil {
             panic(file_error)
         }
@@ -62,7 +62,7 @@ func GetTournamentPrizePool(c *cli.Context) {
 func GetMatchHistory(c *cli.Context) {
     accountID := c.Int("accountId")
     history := godoto.GetMatchHistory(accountID, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
-    
+
     if c.Bool("summary") {
         result := ""
         matches := history.GetDetails()
