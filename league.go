@@ -1,32 +1,32 @@
 package godoto
 
 import (
-    "encoding/json"
+	"encoding/json"
 )
 
 type Leagues struct {
-    Leagues []League    `json:"leagues"`
+	Leagues []League `json:"leagues"`
 }
 
 type League struct {
-    Name        string  `json:"name"`
-    Id          int     `json:"leagueid"`
-    Description string  `json:"description"`
-    URL         string  `json:"tournament_url"`
+	Name        string `json:"name"`
+	Id          int    `json:"leagueid"`
+	Description string `json:"description"`
+	URL         string `json:"tournament_url"`
 }
 
 func GetLeagueListing() (leagues Leagues) {
-    result := DotaAPI("GetLeagueListing", true).GetResult()
+	result := DotaAPI("GetLeagueListing", true).GetResult()
 
-    err := json.Unmarshal(result.Data, &leagues)
-    pError(err)
-    return
+	err := json.Unmarshal(result.Data, &leagues)
+	failOnError(err)
+	return
 }
 
 func GetTournamentPrizePool(leagueID int) float64 {
-    result := DotaAPI("GetTournamentPrizePool", false).GetResult()
-    var data map[string]interface{}
-    err := json.Unmarshal(result.Data, &data)
-    pError(err)
-    return data["prize_pool"].(float64)
+	result := DotaAPI("GetTournamentPrizePool", false).GetResult()
+	var data map[string]interface{}
+	err := json.Unmarshal(result.Data, &data)
+	failOnError(err)
+	return data["prize_pool"].(float64)
 }

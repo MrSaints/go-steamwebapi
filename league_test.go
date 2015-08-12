@@ -1,17 +1,17 @@
 package godoto
 
 import (
-    "testing"
+	"testing"
 )
 
 func BenchmarkGetLeagueListing(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        GetLeagueListing()
-    }
+	for i := 0; i < b.N; i++ {
+		GetLeagueListing()
+	}
 }
 
 func BenchmarkGetTournamentPrizePool(b *testing.B) {
-    for i := 0; i < b.N; i++ {
-        GetTournamentPrizePool(600)
-    }
+	for i := 0; i < b.N; i++ {
+		GetTournamentPrizePool(600)
+	}
 }
