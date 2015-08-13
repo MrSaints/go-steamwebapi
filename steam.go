@@ -2,80 +2,86 @@ package godoto
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	//"log"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 )
 
-const API_HOST = "api.steampowered.com"
-const DOTA_ID = "570"
+// See https://wiki.teamfortress.com/wiki/WebAPI for more information.
+const (
+    defaultBaseURL = "https://api.steampowered.com"
+    dotaID = "570"
+    baseDOTA2Endpoint = "IEconDOTA2_" + dotaID
+    baseDOTA2MatchEndpoint = "IDOTA2Match_" + dotaID
+)
 
-type WebAPI struct {
-	Endpoint string
-	Params   url.Values
-	Version  int
+type Client struct {
+    BaseURL  *url.URL
 	Language string
 	Key      string
+
+    DOTA2        *DOTA2Services
+    DOTA2Matches *DOTA2MatchesServices
 }
 
 type Result struct {
-	Data json.RawMessage `json:"result"`
+	Data interface{} `json:"result"`
 }
 
-func DotaAPI(method string, match bool) (webAPI *WebAPI) {
-	endpoint := "/"
+/*
+ * Returns a new Steam Web API client.
+ * You can specify your API key as a parameter (k) or leave it blank
+ * to use the STEAM_API_KEY environment variable.
+ */
+func NewClient(k string) *Client {
+    c := new(Client)
+    c.BaseURL, _ = url.Parse(defaultBaseURL)
+    c.Language = "en"
 
-	if !match {
-		endpoint += "IEconDOTA2"
-	} else {
-		endpoint += "IDOTA2Match"
-	}
+    if k == "" {
+        c.Key = os.Getenv("STEAM_API_KEY")
+    }
 
-	webAPI = new(WebAPI)
-	webAPI.Endpoint = endpoint + "_" + DOTA_ID + "/" + method
-	return
+    c.DOTA2 = &DOTA2Services{client: c}
+    c.DOTA2Matches = &DOTA2MatchesServices{client: c}
+
+    return c
 }
 
-func (this *WebAPI) GetResult() (result Result) {
-	// Set defaults
-	if this.Version == 0 {
-		this.Version = 1
-	}
+/*
+ * Creates and sends an API request using the specified endpoint (e),
+ * params (p), and interface (v). The latter will be used to deconstruct,
+ * and store the JSON result.
+ */
+func (c *Client) Get(e string, p url.Values, v interface{}) (*http.Response, error) {
+    rel, err := url.Parse(e)
+    if err != nil {
+        return nil, err
+    }
 
-	if this.Language == "" {
-		this.Language = "en"
-	}
+    u := c.BaseURL.ResolveReference(rel)
 
-	if this.Key == "" {
-		this.Key = os.Getenv("STEAM_API_KEY")
-	}
+    if p == nil {
+        p = url.Values{}
+    }
 
-	// Build Web API URL
-	apiURL := url.URL{}
-	apiURL.Scheme = "https"
-	apiURL.Host = API_HOST
-	apiURL.Path = this.Endpoint + "/v" + strconv.Itoa(this.Version)
+    p.Set("key", c.Key)
+    p.Set("language", c.Language)
+    u.RawQuery = p.Encode()
 
-	if this.Params == nil {
-		this.Params = url.Values{}
-	}
+    //log.Println(u.String())
 
-	this.Params.Set("key", this.Key)
-	this.Params.Set("language", this.Language)
-	apiURL.RawQuery = this.Params.Encode()
-
-	// GET request
-	res, err := http.Get(apiURL.String())
-	failOnError(err)
+	res, err := http.Get(u.String())
+	if err != nil {
+        return nil, err
+    }
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	failOnError(err)
+	err = json.NewDecoder(res.Body).Decode(&Result{v})
+    if err != nil {
+        return nil, err
+    }
 
-	err = json.Unmarshal(body, &result)
-	failOnError(err)
-
-	return
+	return res, err
 }

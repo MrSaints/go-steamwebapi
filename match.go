@@ -1,10 +1,14 @@
 package godoto
 
 import (
-	"encoding/json"
 	"net/url"
 	"strconv"
 )
+
+// A service to handle methods related to Dota 2 matches.
+type DOTA2MatchesServices struct {
+    client *Client
+}
 
 type MatchHistory struct {
 	Status    int     `json:"status"`
@@ -85,86 +89,95 @@ type Ability struct {
 	Level int `json:"level"`
 }
 
-func GetMatchHistory(accountID int, gameMode int, skill int, heroID int, minPlayers int, leagueID int, startAtMatchID int, limit int, tournamentOnly bool) (history MatchHistory) {
-	api := DotaAPI("GetMatchHistory", true)
+type Leagues struct {
+	Leagues []League `json:"leagues"`
+}
 
-	api.Params = url.Values{}
-	api.Params.Set("account_id", strconv.Itoa(accountID))
-	api.Params.Set("game_mode", strconv.Itoa(gameMode))
-	api.Params.Set("skill", strconv.Itoa(skill))
-	api.Params.Set("hero_id", strconv.Itoa(heroID))
-	api.Params.Set("min_players", strconv.Itoa(minPlayers))
-	api.Params.Set("league_id", strconv.Itoa(leagueID))
-	api.Params.Set("start_at_match_id", strconv.Itoa(startAtMatchID))
+type League struct {
+	Name        string `json:"name"`
+	Id          int    `json:"leagueid"`
+	Description string `json:"description"`
+	URL         string `json:"tournament_url"`
+}
+
+/*
+ * Returns a list of matches, filterable by various parameters.
+ * See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
+ */
+func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skill int, heroID int, minPlayers int, leagueID int, startAtMatchID int, limit int, tournamentOnly bool) *MatchHistory {
+	params := url.Values{}
+	params.Set("account_id", strconv.Itoa(accountID))
+	params.Set("game_mode", strconv.Itoa(gameMode))
+	params.Set("skill", strconv.Itoa(skill))
+	params.Set("hero_id", strconv.Itoa(heroID))
+	params.Set("min_players", strconv.Itoa(minPlayers))
+	params.Set("league_id", strconv.Itoa(leagueID))
+	params.Set("start_at_match_id", strconv.Itoa(startAtMatchID))
 
 	if limit > 0 {
-		api.Params.Set("matches_requested", strconv.Itoa(limit))
+		params.Set("matches_requested", strconv.Itoa(limit))
 	} else {
-		api.Params.Set("matches_requested", "5")
+		params.Set("matches_requested", "5")
 	}
 
 	if tournamentOnly {
-		api.Params.Set("tournament_games_only", "1")
+		params.Set("tournament_games_only", "1")
 	}
 
-	result := api.GetResult()
-
-	history = MatchHistory{}
-	err := json.Unmarshal(result.Data, &history)
+	history := new(MatchHistory)
+	_, err := s.client.Get(baseDOTA2MatchEndpoint + "/GetMatchHistory/v1", params, history)
 	failOnError(err)
-	return
+
+	return history
 }
 
-func GetMatchDetails(matchID int) (match MatchDetails) {
-	api := DotaAPI("GetMatchDetails", true)
-	api.Params = url.Values{}
-	api.Params.Set("match_id", strconv.Itoa(matchID))
+/*
+ * Returns information about a particular match.
+ * See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
+ */
+func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) *MatchDetails {
+	params := url.Values{}
+	params.Set("match_id", strconv.Itoa(matchID))
 
-	result := api.GetResult()
-
-	match = MatchDetails{}
-	err := json.Unmarshal(result.Data, &match)
+	match := new(MatchDetails)
+	_, err := s.client.Get(baseDOTA2MatchEndpoint + "/GetMatchDetails/v1", params, match)
 	failOnError(err)
-	return
+
+	return match
 }
 
-func (this Match) GetDetails() MatchDetails {
-	return GetMatchDetails(this.Id)
+/*
+ * Returns a player's team and position.
+ * The player's slot is stored as an 8-bit uint: 0 0 0 0 0 0 0 0.
+ * The first bit (LtR) represents the player's team (i.e. 1 / True = Dire).
+ * The final 3 bits represents the player's position within a team.
+ */
+func (p PlayerDetails) GetPosition() (bool, int) {
+    isDire := false
+    if (p.Position>>7) == 1 {
+        isDire = true
+    }
+    position := p.Position & 111
+    return isDire, position
 }
 
-func (this MatchHistory) GetDetails() (matches Matches) {
-	done := make(chan bool)
-	history := this.Matches
-	total := len(history) - 1
-
-	for i, element := range history {
-		go func(i int, element Match) {
-			matches = append(matches, element.GetDetails())
-			if i == total {
-				done <- true
-			}
-		}(i, element)
-	}
-	<-done
-	return
+func (m MatchDetails) GetPosition(accountID int) (bool, int) {
+    isDire, position := false, 0
+    for _, player := range m.Players {
+        if accountID == player.Id {
+            return player.GetPosition()
+        }
+    }
+    return isDire, position
 }
 
-func (this PlayerDetails) GetPosition() (isDire bool, position int) {
-	isDire = false
-	if (this.Position&(1<<7))>>7 == 1 {
-		isDire = true
-	}
-	position = this.Position & 111
-	return
-}
-
-func (this MatchDetails) GetPosition(accountID int) (isDire bool, position int) {
-	isDire, position = false, 0
-	for _, player := range this.Players {
-		if accountID == player.Id {
-			isDire, position = player.GetPosition()
-			return
-		}
-	}
-	return
+/*
+ * Returns information about DotaTV-supported leagues.
+ * See https://wiki.teamfortress.com/wiki/WebAPI/GetLeagueListing for more information.
+ */
+func (s *DOTA2MatchesServices) GetLeagueListing() *Leagues {
+	leagues := new(Leagues)
+	_, err := s.client.Get(baseDOTA2MatchEndpoint + "/GetLeagueListing/v1", nil, leagues)
+	failOnError(err)
+	return leagues
 }

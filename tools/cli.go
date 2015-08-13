@@ -9,6 +9,10 @@ import (
     "github.com/ugorji/go/codec"
 )
 
+var (
+    client *godoto.Client
+)
+
 func Dump(fileName string, data interface{}) (err error) {
     var (
         packed []byte
@@ -22,7 +26,7 @@ func Dump(fileName string, data interface{}) (err error) {
 }
 
 func GetHeroes(c *cli.Context) {
-    heroes := godoto.GetHeroes()
+    heroes := client.DOTA2.GetHeroes()
 
     if c.Bool("msgpack") {
         file_error := Dump("heroes.bin", heroes)
@@ -39,7 +43,7 @@ func GetHeroes(c *cli.Context) {
 }
 
 func GetLeagueListing(c *cli.Context) {
-    listing := godoto.GetLeagueListing()
+    listing := client.DOTA2Matches.GetLeagueListing()
 
     if c.Bool("msgpack") {
         file_error := Dump("leagues.bin", listing.Leagues)
@@ -56,45 +60,20 @@ func GetLeagueListing(c *cli.Context) {
 }
 
 func GetTournamentPrizePool(c *cli.Context) {
-    prize := godoto.GetTournamentPrizePool(c.Int("leagueID"))
+    prize := client.DOTA2.GetTournamentPrizePool(c.Int("leagueID"))
     log.Printf("Prize pool: %v", prize)
 }
 
 func GetMatchHistory(c *cli.Context) {
     accountID := c.Int("accountId")
-    history := godoto.GetMatchHistory(accountID, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
+    history := client.DOTA2Matches.GetMatchHistory(accountID, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
 
-    if c.Bool("summary") {
-        result := ""
-        matches := history.GetDetails()
-
-        for _, match := range matches {
-            if accountID == 0 {
-                if match.RadiantWin {
-                    result += "R"
-                } else {
-                    result += "D"
-                }
-                continue
-            }
-
-            isDire, _ := match.GetPosition(accountID)
-            if match.RadiantWin && !isDire {
-                result += "W"
-            } else if !match.RadiantWin && isDire {
-                result += "W"
-            } else {
-                result += "L"
-            }
-        }
-
-        log.Println(result)
-    } else {
-        log.Println(history)
-    }
+    log.Println(history)
 }
 
 func main() {
+    client = godoto.NewClient("")
+
     commands := []cli.Command{
         {
             Name: "GetHeroes",
