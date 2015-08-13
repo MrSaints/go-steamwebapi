@@ -37,9 +37,9 @@ func (s *DOTA2Services) GetHeroes() Heroes {
  Returns the current prize pool for specific tournaments.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetTournamentPrizePool for more information.
 */
-func (s *DOTA2Services) GetTournamentPrizePool(leagueID int) float64 {
+func (s *DOTA2Services) GetTournamentPrizePool(leagueId int) float64 {
 	params := url.Values{}
-	params.Set("leagueid", strconv.Itoa(leagueID))
+	params.Set("leagueid", strconv.Itoa(leagueId))
 
 	var data map[string]interface{}
 	_, err := s.client.Get(baseDOTA2Endpoint+"/GetTournamentPrizePool/v1", params, &data)
