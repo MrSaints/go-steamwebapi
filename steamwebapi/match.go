@@ -1,8 +1,11 @@
 package steamwebapi
 
 import (
+	//"log"
 	"net/url"
+	"sort"
 	"strconv"
+	"sync"
 )
 
 // A service to handle methods related to Dota 2 matches.
@@ -27,9 +30,9 @@ type Match struct {
 }
 
 type Player struct {
-	Id       int `json:"account_id"`
-	Position int `json:"player_slot"`
-	Hero     int `json:"hero_id"`
+	Id       int   `json:"account_id"`
+	Position int   `json:"player_slot"`
+	Hero     int   `json:"hero_id"`
 }
 
 type Matches []MatchDetails
@@ -104,15 +107,15 @@ type League struct {
  Returns a list of matches, filterable by various parameters.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
  */
-func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skill int, heroID int, minPlayers int, leagueID int, startAtMatchID int, limit int, tournamentOnly bool) *MatchHistory {
+func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skill int, heroId int, minPlayers int, leagueId int, startAtMatchId int, limit int, tournamentOnly bool) MatchHistory {
 	params := url.Values{}
-	params.Set("account_id", strconv.Itoa(accountID))
+	params.Set("account_id", strconv.Itoa(accountId))
 	params.Set("game_mode", strconv.Itoa(gameMode))
 	params.Set("skill", strconv.Itoa(skill))
-	params.Set("hero_id", strconv.Itoa(heroID))
+	params.Set("hero_id", strconv.Itoa(heroId))
 	params.Set("min_players", strconv.Itoa(minPlayers))
-	params.Set("league_id", strconv.Itoa(leagueID))
-	params.Set("start_at_match_id", strconv.Itoa(startAtMatchID))
+	params.Set("league_id", strconv.Itoa(leagueId))
+	params.Set("start_at_match_id", strconv.Itoa(startAtMatchId))
 
 	if limit > 0 {
 		params.Set("matches_requested", strconv.Itoa(limit))
@@ -128,26 +131,66 @@ func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skil
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchHistory/v1", params, history)
 	failOnError(err)
 
-	return history
+	return *history
 }
 
 /*
  Returns information about a particular match.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
  */
-func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) *MatchDetails {
+func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) MatchDetails {
 	params := url.Values{}
-	params.Set("match_id", strconv.Itoa(matchID))
+	params.Set("match_id", strconv.Itoa(matchId))
 
 	match := new(MatchDetails)
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchDetails/v1", params, match)
 	failOnError(err)
 
-	return match
+	return *match
 }
 
 /*
- Returns a player's team and position.
+ Returns more information about a match using Match{}.
+ Requires a DOTA2MatchesServices client.
+ */
+func (m Match) GetDetails(s *DOTA2MatchesServices) MatchDetails {
+    return s.GetMatchDetails(m.Id)
+}
+
+/*
+ Returns more information about a match history using MatchHistory{}.
+ Requires a DOTA2MatchesServices client.
+ */
+func (h MatchHistory) GetDetails(s *DOTA2MatchesServices) Matches {
+	history := h.Matches
+	total := len(history)
+
+	out := make(chan MatchDetails, total)
+	var wg sync.WaitGroup
+	wg.Add(total)
+
+    for _, m := range history {
+        go func(m Match, s *DOTA2MatchesServices) {
+        	out <- m.GetDetails(s)
+        	wg.Done()
+        }(m, s)
+    }
+
+    go func() {
+    	wg.Wait()
+    	close(out)
+	}()
+
+    var matches Matches
+    for m := range out {
+    	matches = append(matches, m)
+    }
+    sort.Sort(ByMatchId(matches))
+    return matches
+}
+
+/*
+ Returns a player's team and position using PlayerDetails{}.
  The player's slot is stored as an 8-bit uint: 0 0 0 0 0 0 0 0.
  The first bit (LtR) represents the player's team (i.e. 1 / True = Dire).
  The final 3 bits represents the player's position within a team.
@@ -161,14 +204,24 @@ func (p PlayerDetails) GetPosition() (bool, int) {
 	return isDire, position
 }
 
-func (m MatchDetails) GetPosition(accountID int) (bool, int) {
-	isDire, position := false, 0
-	for _, player := range m.Players {
-		if accountID == player.Id {
-			return player.GetPosition()
+/*
+ Returns a player's team and position using their account Id.
+ */
+func (m MatchDetails) GetPositionByAccount(aId int32) (bool, int) {
+	isDire, pos := false, 0
+	for _, p := range m.Players {
+		if aId == int32(p.Id) {
+			return p.GetPosition()
 		}
 	}
-	return isDire, position
+	return isDire, pos
+}
+
+/*
+ Returns a 32-bit Steam community Id from a 64-bit account Id
+ */
+func CommunityId(aId int64) int32 {
+	return int32(aId)
 }
 
 /*
