@@ -6,7 +6,7 @@ import (
 
 func failOnError(err error) {
     if err != nil {
-        log.Fatalf(err)
+        log.Fatal(err)
         panic(err)
     }
 }
