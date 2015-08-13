@@ -101,8 +101,8 @@ type League struct {
 }
 
 /*
- * Returns a list of matches, filterable by various parameters.
- * See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
+ Returns a list of matches, filterable by various parameters.
+ See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
  */
 func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skill int, heroID int, minPlayers int, leagueID int, startAtMatchID int, limit int, tournamentOnly bool) *MatchHistory {
 	params := url.Values{}
@@ -132,8 +132,8 @@ func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skil
 }
 
 /*
- * Returns information about a particular match.
- * See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
+ Returns information about a particular match.
+ See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
  */
 func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) *MatchDetails {
 	params := url.Values{}
@@ -147,10 +147,10 @@ func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) *MatchDetails {
 }
 
 /*
- * Returns a player's team and position.
- * The player's slot is stored as an 8-bit uint: 0 0 0 0 0 0 0 0.
- * The first bit (LtR) represents the player's team (i.e. 1 / True = Dire).
- * The final 3 bits represents the player's position within a team.
+ Returns a player's team and position.
+ The player's slot is stored as an 8-bit uint: 0 0 0 0 0 0 0 0.
+ The first bit (LtR) represents the player's team (i.e. 1 / True = Dire).
+ The final 3 bits represents the player's position within a team.
  */
 func (p PlayerDetails) GetPosition() (bool, int) {
 	isDire := false
@@ -172,8 +172,8 @@ func (m MatchDetails) GetPosition(accountID int) (bool, int) {
 }
 
 /*
- * Returns information about DotaTV-supported leagues.
- * See https://wiki.teamfortress.com/wiki/WebAPI/GetLeagueListing for more information.
+ Returns information about DotaTV-supported leagues.
+ See https://wiki.teamfortress.com/wiki/WebAPI/GetLeagueListing for more information.
  */
 func (s *DOTA2MatchesServices) GetLeagueListing() *Leagues {
 	leagues := new(Leagues)

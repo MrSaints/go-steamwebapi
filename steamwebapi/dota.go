@@ -23,8 +23,8 @@ type Hero struct {
 }
 
 /*
- * Returns a list of heroes within Dota 2.
- * See https://wiki.teamfortress.com/wiki/WebAPI/GetHeroes for more information.
+ Returns a list of heroes within Dota 2.
+ See https://wiki.teamfortress.com/wiki/WebAPI/GetHeroes for more information.
  */
 func (s *DOTA2Services) GetHeroes() *Heroes {
 	heroes := new(Heroes)
@@ -35,8 +35,8 @@ func (s *DOTA2Services) GetHeroes() *Heroes {
 }
 
 /*
- * Returns the current prize pool for specific tournaments.
- * See https://wiki.teamfortress.com/wiki/WebAPI/GetTournamentPrizePool for more information.
+ Returns the current prize pool for specific tournaments.
+ See https://wiki.teamfortress.com/wiki/WebAPI/GetTournamentPrizePool for more information.
  */
 func (s *DOTA2Services) GetTournamentPrizePool(leagueID int) float64 {
 	params := url.Values{}
