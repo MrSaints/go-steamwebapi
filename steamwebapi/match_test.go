@@ -5,29 +5,43 @@ import (
 )
 
 func BenchmarkGetMatchHistory(b *testing.B) {
+	setup()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		GetMatchHistory(47724064, 0, 0, 0, 0, 0, 0, 0, false)
+		client.DOTA2Matches.GetMatchHistory(47724064, 0, 0, 0, 0, 0, 0, 0, false)
 	}
 }
 
 func BenchmarkGetMatchDetails(b *testing.B) {
+	setup()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		GetMatchDetails(714452368)
+		client.DOTA2Matches.GetMatchDetails(714452368)
 	}
 }
 
 func BenchmarkMatchHistoryGetDetails(b *testing.B) {
-	history := GetMatchHistory(47724064, 0, 0, 0, 0, 0, 0, 0, false)
+	setup()
+	history := client.DOTA2Matches.GetMatchHistory(47724064, 0, 0, 0, 0, 0, 0, 0, false)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		history.GetDetails()
+		history.GetDetails(client.DOTA2Matches)
 	}
 }
 
 func BenchmarkMatchDetailsGetPosition(b *testing.B) {
-	match := GetMatchDetails(714452368)
+	setup()
+	match := client.DOTA2Matches.GetMatchDetails(714452368)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		match.GetPosition(7653193)
+		match.GetPositionByAccount(7653193)
+	}
+}
+
+func BenchmarkGetLeagueListing(b *testing.B) {
+	setup()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		client.DOTA2Matches.GetLeagueListing()
 	}
 }

@@ -2,7 +2,7 @@ package steamwebapi
 
 import (
 	"encoding/json"
-	"log"
+	//"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -70,7 +70,7 @@ func (c *Client) Get(e string, p url.Values, v interface{}) (*http.Response, err
 	p.Set("language", c.Language)
 	u.RawQuery = p.Encode()
 
-	log.Printf("API requested: %v", u.String())
+	//log.Printf("API requested: %v", u.String())
 
 	res, err := http.Get(u.String())
 	if err != nil {
