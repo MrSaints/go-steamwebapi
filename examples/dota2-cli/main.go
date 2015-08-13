@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	client *godoto.Client
+	client *steamwebapi.Client
 )
 
 func Dump(fileName string, data interface{}) (err error) {
@@ -72,7 +72,7 @@ func GetMatchHistory(c *cli.Context) {
 }
 
 func main() {
-	client = godoto.NewClient("")
+	client = steamwebapi.NewClient("")
 
 	commands := []cli.Command{
 		{
