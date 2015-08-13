@@ -2,7 +2,7 @@ package steamwebapi
 
 import (
 	"encoding/json"
-	//"log"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,9 +11,9 @@ import (
 // See https://wiki.teamfortress.com/wiki/WebAPI for more information.
 const (
 	defaultBaseURL         = "https://api.steampowered.com"
-	dotaID                 = "570"
-	baseDOTA2Endpoint      = "IEconDOTA2_" + dotaID
-	baseDOTA2MatchEndpoint = "IDOTA2Match_" + dotaID
+	dotaId                 = "570"
+	baseDOTA2Endpoint      = "IEconDOTA2_" + dotaId
+	baseDOTA2MatchEndpoint = "IDOTA2Match_" + dotaId
 )
 
 type Client struct {
@@ -70,7 +70,7 @@ func (c *Client) Get(e string, p url.Values, v interface{}) (*http.Response, err
 	p.Set("language", c.Language)
 	u.RawQuery = p.Encode()
 
-	//log.Println(u.String())
+	log.Printf("API requested: %v", u.String())
 
 	res, err := http.Get(u.String())
 	if err != nil {
