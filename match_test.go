@@ -1,4 +1,4 @@
-package godoto
+package steamwebapi
 
 import (
 	"testing"

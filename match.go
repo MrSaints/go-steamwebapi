@@ -1,4 +1,4 @@
-package godoto
+package steamwebapi
 
 import (
 	"net/url"
@@ -7,7 +7,7 @@ import (
 
 // A service to handle methods related to Dota 2 matches.
 type DOTA2MatchesServices struct {
-    client *Client
+	client *Client
 }
 
 type MatchHistory struct {
@@ -125,7 +125,7 @@ func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skil
 	}
 
 	history := new(MatchHistory)
-	_, err := s.client.Get(baseDOTA2MatchEndpoint + "/GetMatchHistory/v1", params, history)
+	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchHistory/v1", params, history)
 	failOnError(err)
 
 	return history
@@ -140,7 +140,7 @@ func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) *MatchDetails {
 	params.Set("match_id", strconv.Itoa(matchID))
 
 	match := new(MatchDetails)
-	_, err := s.client.Get(baseDOTA2MatchEndpoint + "/GetMatchDetails/v1", params, match)
+	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchDetails/v1", params, match)
 	failOnError(err)
 
 	return match
@@ -153,22 +153,22 @@ func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) *MatchDetails {
  * The final 3 bits represents the player's position within a team.
  */
 func (p PlayerDetails) GetPosition() (bool, int) {
-    isDire := false
-    if (p.Position>>7) == 1 {
-        isDire = true
-    }
-    position := p.Position & 111
-    return isDire, position
+	isDire := false
+	if (p.Position >> 7) == 1 {
+		isDire = true
+	}
+	position := p.Position & 111
+	return isDire, position
 }
 
 func (m MatchDetails) GetPosition(accountID int) (bool, int) {
-    isDire, position := false, 0
-    for _, player := range m.Players {
-        if accountID == player.Id {
-            return player.GetPosition()
-        }
-    }
-    return isDire, position
+	isDire, position := false, 0
+	for _, player := range m.Players {
+		if accountID == player.Id {
+			return player.GetPosition()
+		}
+	}
+	return isDire, position
 }
 
 /*
@@ -177,7 +177,7 @@ func (m MatchDetails) GetPosition(accountID int) (bool, int) {
  */
 func (s *DOTA2MatchesServices) GetLeagueListing() *Leagues {
 	leagues := new(Leagues)
-	_, err := s.client.Get(baseDOTA2MatchEndpoint + "/GetLeagueListing/v1", nil, leagues)
+	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetLeagueListing/v1", nil, leagues)
 	failOnError(err)
 	return leagues
 }

@@ -1,4 +1,4 @@
-package godoto
+package steamwebapi
 
 import (
 	"encoding/json"
@@ -10,19 +10,19 @@ import (
 
 // See https://wiki.teamfortress.com/wiki/WebAPI for more information.
 const (
-    defaultBaseURL = "https://api.steampowered.com"
-    dotaID = "570"
-    baseDOTA2Endpoint = "IEconDOTA2_" + dotaID
-    baseDOTA2MatchEndpoint = "IDOTA2Match_" + dotaID
+	defaultBaseURL         = "https://api.steampowered.com"
+	dotaID                 = "570"
+	baseDOTA2Endpoint      = "IEconDOTA2_" + dotaID
+	baseDOTA2MatchEndpoint = "IDOTA2Match_" + dotaID
 )
 
 type Client struct {
-    BaseURL  *url.URL
+	BaseURL  *url.URL
 	Language string
 	Key      string
 
-    DOTA2        *DOTA2Services
-    DOTA2Matches *DOTA2MatchesServices
+	DOTA2        *DOTA2Services
+	DOTA2Matches *DOTA2MatchesServices
 }
 
 type Result struct {
@@ -35,18 +35,18 @@ type Result struct {
  * to use the STEAM_API_KEY environment variable.
  */
 func NewClient(k string) *Client {
-    c := new(Client)
-    c.BaseURL, _ = url.Parse(defaultBaseURL)
-    c.Language = "en"
+	c := new(Client)
+	c.BaseURL, _ = url.Parse(defaultBaseURL)
+	c.Language = "en"
 
-    if k == "" {
-        c.Key = os.Getenv("STEAM_API_KEY")
-    }
+	if k == "" {
+		c.Key = os.Getenv("STEAM_API_KEY")
+	}
 
-    c.DOTA2 = &DOTA2Services{client: c}
-    c.DOTA2Matches = &DOTA2MatchesServices{client: c}
+	c.DOTA2 = &DOTA2Services{client: c}
+	c.DOTA2Matches = &DOTA2MatchesServices{client: c}
 
-    return c
+	return c
 }
 
 /*
@@ -55,33 +55,33 @@ func NewClient(k string) *Client {
  * and store the JSON result.
  */
 func (c *Client) Get(e string, p url.Values, v interface{}) (*http.Response, error) {
-    rel, err := url.Parse(e)
-    if err != nil {
-        return nil, err
-    }
+	rel, err := url.Parse(e)
+	if err != nil {
+		return nil, err
+	}
 
-    u := c.BaseURL.ResolveReference(rel)
+	u := c.BaseURL.ResolveReference(rel)
 
-    if p == nil {
-        p = url.Values{}
-    }
+	if p == nil {
+		p = url.Values{}
+	}
 
-    p.Set("key", c.Key)
-    p.Set("language", c.Language)
-    u.RawQuery = p.Encode()
+	p.Set("key", c.Key)
+	p.Set("language", c.Language)
+	u.RawQuery = p.Encode()
 
-    //log.Println(u.String())
+	//log.Println(u.String())
 
 	res, err := http.Get(u.String())
 	if err != nil {
-        return nil, err
-    }
+		return nil, err
+	}
 	defer res.Body.Close()
 
 	err = json.NewDecoder(res.Body).Decode(&Result{v})
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
 	return res, err
 }

@@ -1,4 +1,4 @@
-package godoto
+package steamwebapi
 
 import (
 	//"log"
@@ -8,7 +8,7 @@ import (
 
 // A service to handle methods related to Dota 2.
 type DOTA2Services struct {
-    client *Client
+	client *Client
 }
 
 type Heroes struct {
@@ -28,7 +28,7 @@ type Hero struct {
  */
 func (s *DOTA2Services) GetHeroes() *Heroes {
 	heroes := new(Heroes)
-	_, err := s.client.Get(baseDOTA2Endpoint + "/GetHeroes/v1", nil, heroes)
+	_, err := s.client.Get(baseDOTA2Endpoint+"/GetHeroes/v1", nil, heroes)
 	failOnError(err)
 
 	return heroes
@@ -43,7 +43,7 @@ func (s *DOTA2Services) GetTournamentPrizePool(leagueID int) float64 {
 	params.Set("leagueid", strconv.Itoa(leagueID))
 
 	var data map[string]interface{}
-	_, err := s.client.Get(baseDOTA2Endpoint + "/GetTournamentPrizePool/v1", params, &data)
+	_, err := s.client.Get(baseDOTA2Endpoint+"/GetTournamentPrizePool/v1", params, &data)
 	failOnError(err)
 
 	//log.Println(data)

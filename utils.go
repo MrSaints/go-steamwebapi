@@ -1,12 +1,12 @@
-package godoto
+package steamwebapi
 
 import (
-    "log"
+	"log"
 )
 
 func failOnError(err error) {
-    if err != nil {
-        log.Fatal(err)
-        panic(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+		panic(err)
+	}
 }
