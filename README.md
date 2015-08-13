@@ -1,6 +1,6 @@
 # go-steamwebapi
 
-A simple Go package for programmatically working with [Steam's Web API][] (particularly its [Dota 2 Web API][]).
+A simple and idiomatic Go package for programmatically working with [Steam's Web API][] (particularly its [Dota 2 Web API][]).
 
 ## Installation
 
