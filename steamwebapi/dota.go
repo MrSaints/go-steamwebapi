@@ -1,7 +1,6 @@
 package steamwebapi
 
 import (
-	//"log"
 	"net/url"
 	"strconv"
 )
@@ -26,12 +25,12 @@ type Hero struct {
  Returns a list of heroes within Dota 2.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetHeroes for more information.
  */
-func (s *DOTA2Services) GetHeroes() *Heroes {
+func (s *DOTA2Services) GetHeroes() Heroes {
 	heroes := new(Heroes)
 	_, err := s.client.Get(baseDOTA2Endpoint+"/GetHeroes/v1", nil, heroes)
 	failOnError(err)
 
-	return heroes
+	return *heroes
 }
 
 /*
@@ -45,8 +44,6 @@ func (s *DOTA2Services) GetTournamentPrizePool(leagueID int) float64 {
 	var data map[string]interface{}
 	_, err := s.client.Get(baseDOTA2Endpoint+"/GetTournamentPrizePool/v1", params, &data)
 	failOnError(err)
-
-	//log.Println(data)
 
 	return data["prize_pool"].(float64)
 }
