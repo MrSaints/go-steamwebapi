@@ -54,7 +54,3 @@ $RECYCLE.BIN/
 
 #sftp configuration file
 sftp-config.json
-
-
-### Dota 2 MsgPack Generator ###
-*.bin
