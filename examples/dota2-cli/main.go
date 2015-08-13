@@ -1,11 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/mrsaints/go-steamwebapi/steamwebapi"
-	"github.com/ugorji/go/codec"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -13,62 +13,49 @@ var (
 	client *steamwebapi.Client
 )
 
-func Dump(fileName string, data interface{}) (err error) {
-	var (
-		packed []byte
-		handle codec.MsgpackHandle
-	)
-	encoder := codec.NewEncoderBytes(&packed, &handle)
-	encoder.Encode(data)
-
-	err = ioutil.WriteFile(fileName, packed, 0644)
-	return
+func Dump(b bool, n string, v interface{}) error {
+	if !b {
+		return nil
+	}
+	e, _ := json.Marshal(v)
+	err := ioutil.WriteFile(n, e, 0644)
+	return err
 }
 
 func GetHeroes(c *cli.Context) {
 	heroes := client.DOTA2.GetHeroes()
 
-	if c.Bool("msgpack") {
-		file_error := Dump("heroes.bin", heroes)
-		if file_error != nil {
-			panic(file_error)
-		}
-
-		log.Println("Encoded and dumped list of heroes in MsgPack.")
-	} else {
-		log.Println(heroes)
+	dump_error := Dump(c.Bool("json"), "heroes.json", heroes.Heroes)
+	if dump_error != nil {
+		panic(dump_error)
 	}
 
-	log.Printf("Total heroes: %v", heroes.Count)
+	fmt.Println(heroes)
+	fmt.Printf("Total heroes: %v", heroes.Count)
 }
 
 func GetLeagueListing(c *cli.Context) {
 	listing := client.DOTA2Matches.GetLeagueListing()
 
-	if c.Bool("msgpack") {
-		file_error := Dump("leagues.bin", listing.Leagues)
-		if file_error != nil {
-			panic(file_error)
-		}
-
-		log.Println("Encoded and dumped list of leagues in MsgPack.")
-	} else {
-		log.Println(listing)
+	dump_error := Dump(c.Bool("json"), "leagues.json", listing.Leagues)
+	if dump_error != nil {
+		panic(dump_error)
 	}
 
-	log.Printf("Total leagues: %v", len(listing.Leagues))
+	fmt.Println(listing)
+	fmt.Printf("Total leagues: %v", len(listing.Leagues))
 }
 
 func GetTournamentPrizePool(c *cli.Context) {
 	prize := client.DOTA2.GetTournamentPrizePool(c.Int("leagueID"))
-	log.Printf("Prize pool: %v", prize)
+	fmt.Printf("Prize pool: %v", prize)
 }
 
 func GetMatchHistory(c *cli.Context) {
 	accountID := c.Int("accountId")
 	history := client.DOTA2Matches.GetMatchHistory(accountID, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
 
-	log.Println(history)
+	fmt.Println(history)
 }
 
 func main() {
@@ -80,7 +67,7 @@ func main() {
 			ShortName: "h",
 			Usage:     "Returns a list of heroes within Dota 2",
 			Flags: []cli.Flag{
-				cli.BoolFlag{Name: "msgpack", Usage: "Encodes and dumps data in MsgPack"},
+				cli.BoolFlag{Name: "json", Usage: "Encodes and dumps data in JSON"},
 			},
 			Action: GetHeroes,
 		},
@@ -89,14 +76,14 @@ func main() {
 			ShortName: "l",
 			Usage:     "Returns information about DotaTV-supported leagues",
 			Flags: []cli.Flag{
-				cli.BoolFlag{Name: "msgpack", Usage: "Encodes and dumps data in MsgPack"},
+				cli.BoolFlag{Name: "json", Usage: "Encodes and dumps data in JSON"},
 			},
 			Action: GetLeagueListing,
 		},
 		{
 			Name:      "GetTournamentPrizePool",
 			ShortName: "pp",
-			Usage:     "Returns the current prizepool for specific tournaments",
+			Usage:     "Returns the current prize pool for specific tournaments",
 			Flags: []cli.Flag{
 				cli.IntFlag{Name: "id", Value: 600, Usage: "A list of league IDs can be found via the GetLeagueListing method"},
 			},
