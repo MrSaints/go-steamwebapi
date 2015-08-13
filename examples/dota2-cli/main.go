@@ -55,34 +55,34 @@ func GetMatchHistory(c *cli.Context) {
 	accountId := c.Int("accountId")
 	history := client.DOTA2Matches.GetMatchHistory(accountId, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
 
-    if c.Bool("summary") {
-        result := ""
-        matches := history.GetDetails(client.DOTA2Matches)
+	if c.Bool("summary") {
+		result := ""
+		matches := history.GetDetails(client.DOTA2Matches)
 
-        for _, match := range matches {
-            if accountId == 0 {
-                if match.RadiantWin {
-                    result += "R"
-                } else {
-                    result += "D"
-                }
-                continue
-            }
+		for _, match := range matches {
+			if accountId == 0 {
+				if match.RadiantWin {
+					result += "R"
+				} else {
+					result += "D"
+				}
+				continue
+			}
 
-            isDire, _ := match.GetPositionByAccount(int32(accountId))
-            if match.RadiantWin && !isDire {
-                result += "W"
-            } else if !match.RadiantWin && isDire {
-                result += "W"
-            } else {
-                result += "L"
-            }
-        }
+			isDire, _ := match.GetPositionByAccount(int32(accountId))
+			if match.RadiantWin && !isDire {
+				result += "W"
+			} else if !match.RadiantWin && isDire {
+				result += "W"
+			} else {
+				result += "L"
+			}
+		}
 
-        fmt.Println(result)
-    } else {
-        fmt.Println(history)
-    }
+		fmt.Println(result)
+	} else {
+		fmt.Println(history)
+	}
 }
 
 func main() {

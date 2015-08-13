@@ -33,7 +33,7 @@ type Result struct {
  Returns a new Steam Web API client.
  You can specify your API key as a parameter (k) or leave it blank
  to use the STEAM_API_KEY environment variable.
- */
+*/
 func NewClient(k string) *Client {
 	c := new(Client)
 	c.BaseURL, _ = url.Parse(defaultBaseURL)
@@ -53,7 +53,7 @@ func NewClient(k string) *Client {
  Creates and sends an API request using the specified endpoint (e),
  params (p), and interface (v). The latter will be used to deconstruct,
  and store the JSON result.
- */
+*/
 func (c *Client) Get(e string, p url.Values, v interface{}) (*http.Response, error) {
 	rel, err := url.Parse(e)
 	if err != nil {
