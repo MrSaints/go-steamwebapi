@@ -37,7 +37,7 @@ client.DOTA2.GetHeroes()
 client.DOTA2.GetTournamentPrizePool(leagueId)
 ```
 
-View the godocs, [examples](https://github.com/MrSaints/go-steamwebapi/tree/master/examples) or [code](https://github.com/MrSaints/go-steamwebapi/tree/master/steamwebapi) for more information (i.e. available services / methods).
+View the [GoDocs](https://godoc.org/github.com/MrSaints/go-steamwebapi/steamwebapi), [examples](https://github.com/MrSaints/go-steamwebapi/tree/master/examples) or [code](https://github.com/MrSaints/go-steamwebapi/tree/master/steamwebapi) for more information (i.e. available services / methods).
 
 
 [Steam's Web API]: https://developer.valvesoftware.com/wiki/Steam_Web_API
