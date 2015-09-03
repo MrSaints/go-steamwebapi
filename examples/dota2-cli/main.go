@@ -31,7 +31,7 @@ func GetHeroes(c *cli.Context) {
 	}
 
 	fmt.Println(heroes)
-	fmt.Printf("Total heroes: %v", heroes.Count)
+	fmt.Printf("Total heroes: %v\n", heroes.Count)
 }
 
 func GetLeagueListing(c *cli.Context) {
@@ -43,12 +43,12 @@ func GetLeagueListing(c *cli.Context) {
 	}
 
 	fmt.Println(listing)
-	fmt.Printf("Total leagues: %v", len(listing.Leagues))
+	fmt.Printf("Total leagues: %v\n", len(listing.Leagues))
 }
 
 func GetTournamentPrizePool(c *cli.Context) {
 	prize := client.DOTA2.GetTournamentPrizePool(c.Int("leagueID"))
-	fmt.Printf("Prize pool: %v", prize)
+	fmt.Printf("Prize pool: %v\n", prize)
 }
 
 func GetMatchHistory(c *cli.Context) {
@@ -90,36 +90,36 @@ func main() {
 
 	commands := []cli.Command{
 		{
-			Name:      "GetHeroes",
-			ShortName: "h",
-			Usage:     "Returns a list of heroes within Dota 2",
+			Name:    "GetHeroes",
+			Aliases: []string{"h"},
+			Usage:   "Returns a list of heroes within Dota 2",
 			Flags: []cli.Flag{
 				cli.BoolFlag{Name: "json", Usage: "Encodes and dumps data in JSON"},
 			},
 			Action: GetHeroes,
 		},
 		{
-			Name:      "GetLeagueListing",
-			ShortName: "l",
-			Usage:     "Returns information about DotaTV-supported leagues",
+			Name:    "GetLeagueListing",
+			Aliases: []string{"l"},
+			Usage:   "Returns information about DotaTV-supported leagues",
 			Flags: []cli.Flag{
 				cli.BoolFlag{Name: "json", Usage: "Encodes and dumps data in JSON"},
 			},
 			Action: GetLeagueListing,
 		},
 		{
-			Name:      "GetTournamentPrizePool",
-			ShortName: "pp",
-			Usage:     "Returns the current prize pool for specific tournaments",
+			Name:    "GetTournamentPrizePool",
+			Aliases: []string{"pp"},
+			Usage:   "Returns the current prize pool for specific tournaments",
 			Flags: []cli.Flag{
 				cli.IntFlag{Name: "id", Value: 600, Usage: "A list of league IDs can be found via the GetLeagueListing method"},
 			},
 			Action: GetTournamentPrizePool,
 		},
 		{
-			Name:      "GetMatchHistory",
-			ShortName: "mh",
-			Usage:     "Returns a list of matches, filterable by various parameters",
+			Name:    "GetMatchHistory",
+			Aliases: []string{"mh"},
+			Usage:   "Returns a list of matches, filterable by various parameters",
 			Flags: []cli.Flag{
 				cli.IntFlag{Name: "accountId", Value: 0, Usage: "32-bit account ID"},
 				cli.IntFlag{Name: "gameMode", Value: 0, Usage: "Game mode"},
@@ -137,9 +137,9 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.Name = "Dota 2 API CLI"
+	app.Name = "dota2-cli"
 	app.Usage = "Fetch Dota 2 data via Steam's Web API"
-	app.Version = "2.0.0"
+	app.Version = "2.1.0"
 	app.Commands = commands
 	app.Run(os.Args)
 }
