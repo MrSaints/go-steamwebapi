@@ -138,6 +138,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "dota2-cli"
+	app.Authors = []cli.Author{cli.Author{"Ian Lai", "os@fyianlai.com"}}
 	app.Usage = "Fetch Dota 2 data via Steam's Web API"
 	app.Version = "2.1.0"
 	app.Commands = commands
