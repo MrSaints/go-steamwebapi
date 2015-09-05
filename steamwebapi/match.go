@@ -107,7 +107,7 @@ type League struct {
  Returns a list of matches, filterable by various parameters.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
 */
-func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skill int, heroId int, minPlayers int, leagueId int, startAtMatchId int, limit int, tournamentOnly bool) MatchHistory {
+func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skill int, heroId int, minPlayers int, leagueId int, startAtMatchId int, limit int, tournamentOnly bool) (MatchHistory, error) {
 	params := url.Values{}
 	params.Set("account_id", strconv.Itoa(accountId))
 	params.Set("game_mode", strconv.Itoa(gameMode))
@@ -129,31 +129,29 @@ func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skil
 
 	history := new(MatchHistory)
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchHistory/v1", params, history)
-	failOnError(err)
 
-	return *history
+	return *history, err
 }
 
 /*
  Returns information about a particular match.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
 */
-func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) MatchDetails {
+func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) (MatchDetails, error) {
 	params := url.Values{}
 	params.Set("match_id", strconv.Itoa(matchId))
 
 	match := new(MatchDetails)
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchDetails/v1", params, match)
-	failOnError(err)
 
-	return *match
+	return *match, err
 }
 
 /*
  Returns more information about a match using Match{}.
  Requires a DOTA2MatchesServices client.
 */
-func (m Match) GetDetails(s *DOTA2MatchesServices) MatchDetails {
+func (m Match) GetDetails(s *DOTA2MatchesServices) (MatchDetails, error) {
 	return s.GetMatchDetails(m.Id)
 }
 
@@ -171,7 +169,9 @@ func (h MatchHistory) GetDetails(s *DOTA2MatchesServices) Matches {
 
 	for _, m := range history {
 		go func(m Match, s *DOTA2MatchesServices) {
-			out <- m.GetDetails(s)
+			// Supress errors (TODO: terminate on error)
+			md, _ := m.GetDetails(s)
+			out <- md
 			wg.Done()
 		}(m, s)
 	}
@@ -228,9 +228,9 @@ func CommunityId(aId int64) int32 {
  Returns information about DotaTV-supported leagues.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetLeagueListing for more information.
 */
-func (s *DOTA2MatchesServices) GetLeagueListing() *Leagues {
+func (s *DOTA2MatchesServices) GetLeagueListing() (Leagues, error) {
 	leagues := new(Leagues)
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetLeagueListing/v1", nil, leagues)
-	failOnError(err)
-	return leagues
+
+	return *leagues, err
 }

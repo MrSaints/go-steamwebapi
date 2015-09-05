@@ -25,25 +25,25 @@ type Hero struct {
  Returns a list of heroes within Dota 2.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetHeroes for more information.
 */
-func (s *DOTA2Services) GetHeroes() Heroes {
+func (s *DOTA2Services) GetHeroes() (Heroes, error) {
 	heroes := new(Heroes)
 	_, err := s.client.Get(baseDOTA2Endpoint+"/GetHeroes/v1", nil, heroes)
-	failOnError(err)
-
-	return *heroes
+	return *heroes, err
 }
 
 /*
  Returns the current prize pool for specific tournaments.
  See https://wiki.teamfortress.com/wiki/WebAPI/GetTournamentPrizePool for more information.
 */
-func (s *DOTA2Services) GetTournamentPrizePool(leagueId int) float64 {
+func (s *DOTA2Services) GetTournamentPrizePool(leagueId int) (float64, error) {
 	params := url.Values{}
 	params.Set("leagueid", strconv.Itoa(leagueId))
 
 	var data map[string]interface{}
 	_, err := s.client.Get(baseDOTA2Endpoint+"/GetTournamentPrizePool/v1", params, &data)
-	failOnError(err)
+	if err != nil {
+		return 0, err
+	}
 
-	return data["prize_pool"].(float64)
+	return data["prize_pool"].(float64), nil
 }
