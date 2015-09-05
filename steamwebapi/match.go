@@ -148,7 +148,7 @@ func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) (MatchDetails, error
 }
 
 /*
- Returns more information about a match using Match{}.
+ Returns more information about a match using `Match{}`.
  Requires a DOTA2MatchesServices client.
 */
 func (m Match) GetDetails(s *DOTA2MatchesServices) (MatchDetails, error) {
@@ -156,8 +156,8 @@ func (m Match) GetDetails(s *DOTA2MatchesServices) (MatchDetails, error) {
 }
 
 /*
- Returns more information about a match history using MatchHistory{}.
- Requires a DOTA2MatchesServices client.
+ Returns more information about a match history using `MatchHistory{}`.
+ Requires a `DOTA2MatchesServices` client.
 */
 func (h MatchHistory) GetDetails(s *DOTA2MatchesServices) Matches {
 	history := h.Matches

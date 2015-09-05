@@ -32,7 +32,7 @@ type Result struct {
 /*
  Returns a new Steam Web API client.
  You can specify your API key as a parameter (k) or leave it blank
- to use the STEAM_API_KEY environment variable.
+ to use the `STEAM_API_KEY` environment variable.
 */
 func NewClient(k string) *Client {
 	c := new(Client)
