@@ -39,6 +39,7 @@ func NewClient(k string) *Client {
 	c.BaseURL, _ = url.Parse(defaultBaseURL)
 	c.Language = "en"
 
+	c.Key = k
 	if k == "" {
 		c.Key = os.Getenv("STEAM_API_KEY")
 	}
