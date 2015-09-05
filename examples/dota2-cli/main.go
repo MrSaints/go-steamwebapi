@@ -13,47 +13,60 @@ var (
 	client *steamwebapi.Client
 )
 
+func failOnError(err error) {
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+}
+
 func Dump(b bool, n string, v interface{}) error {
 	if !b {
 		return nil
 	}
-	e, _ := json.Marshal(v)
-	err := ioutil.WriteFile(n, e, 0644)
-	return err
+	e, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(n, e, 0644)
 }
 
 func GetHeroes(c *cli.Context) {
-	heroes := client.DOTA2.GetHeroes()
+	heroes, err := client.DOTA2.GetHeroes()
+	failOnError(err)
 
 	dump_error := Dump(c.Bool("json"), "heroes.json", heroes.Heroes)
 	if dump_error != nil {
-		panic(dump_error)
+		failOnError(dump_error)
 	}
 
-	fmt.Println(heroes)
+	fmt.Printf("%+v", heroes)
 	fmt.Printf("Total heroes: %v\n", heroes.Count)
 }
 
 func GetLeagueListing(c *cli.Context) {
-	listing := client.DOTA2Matches.GetLeagueListing()
+	listing, err := client.DOTA2Matches.GetLeagueListing()
+	failOnError(err)
 
 	dump_error := Dump(c.Bool("json"), "leagues.json", listing.Leagues)
 	if dump_error != nil {
-		panic(dump_error)
+		failOnError(dump_error)
 	}
 
-	fmt.Println(listing)
+	fmt.Printf("%+v", listing)
 	fmt.Printf("Total leagues: %v\n", len(listing.Leagues))
 }
 
 func GetTournamentPrizePool(c *cli.Context) {
-	prize := client.DOTA2.GetTournamentPrizePool(c.Int("leagueID"))
+	prize, err := client.DOTA2.GetTournamentPrizePool(c.Int("id"))
+	failOnError(err)
 	fmt.Printf("Prize pool: %v\n", prize)
 }
 
 func GetMatchHistory(c *cli.Context) {
 	accountId := c.Int("accountId")
-	history := client.DOTA2Matches.GetMatchHistory(accountId, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
+	history, err := client.DOTA2Matches.GetMatchHistory(accountId, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
+	failOnError(err)
 
 	if c.Bool("summary") {
 		result := ""
@@ -81,7 +94,7 @@ func GetMatchHistory(c *cli.Context) {
 
 		fmt.Println(result)
 	} else {
-		fmt.Println(history)
+		fmt.Printf("%+v", history)
 	}
 }
 
@@ -112,7 +125,7 @@ func main() {
 			Aliases: []string{"pp"},
 			Usage:   "Returns the current prize pool for specific tournaments",
 			Flags: []cli.Flag{
-				cli.IntFlag{Name: "id", Value: 600, Usage: "A list of league IDs can be found via the GetLeagueListing method"},
+				cli.IntFlag{Name: "id", Value: 2733, Usage: "A list of league IDs can be found via the GetLeagueListing method"},
 			},
 			Action: GetTournamentPrizePool,
 		},
@@ -140,7 +153,7 @@ func main() {
 	app.Name = "dota2-cli"
 	app.Authors = []cli.Author{cli.Author{"Ian Lai", "os@fyianlai.com"}}
 	app.Usage = "Fetch Dota 2 data via Steam's Web API"
-	app.Version = "2.1.0"
+	app.Version = "2.2.0"
 	app.Commands = commands
 	app.Run(os.Args)
 }
