@@ -10,7 +10,7 @@ This library's design was inspired by [go-github][].
 
 ## Usage
 
-1. Download, and install `go-steamwebapi/steamwebapi:`
+1. Download, and install `go-steamwebapi/steamwebapi`:
 
     ```shell
     go get github.com/mrsaints/go-steamwebapi/steamwebapi
