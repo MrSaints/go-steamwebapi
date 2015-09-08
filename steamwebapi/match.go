@@ -8,11 +8,16 @@ import (
 	"sync"
 )
 
-// A service to handle methods related to Dota 2 matches.
+// DOTA2MatchesServices handles communication with the
+// IDOTA2Match related methods of the Steam Web API.
+//
+// Steam Web API docs: https://wiki.teamfortress.com/wiki/WebAPI#Dota_2
 type DOTA2MatchesServices struct {
 	client *Client
 }
 
+// MatchHistory represents a filtered list of Dota 2 matches.
+// It is often used for a player's match history (recent matches).
 type MatchHistory struct {
 	Status    int     `json:"status"`
 	Limit     int     `json:"num_results"`
@@ -21,28 +26,36 @@ type MatchHistory struct {
 	Matches   []Match `json:"matches"`
 }
 
+// Match represents a single Dota 2 match from
+// a filtered list of matches in a MatchHistory.
+// It is not as detailed as MatchDetails, but it is all that is
+// offered from the MatchHistory API.
 type Match struct {
-	Id       int      `json:"match_id"`
+	ID       int      `json:"match_id"`
 	Sequence int      `json:"match_seq_num"`
 	Start    int      `json:"start_time"`
 	Type     int      `json:"lobby_type"`
 	Players  []Player `json:"players"`
 }
 
+// Player represents a single Dota 2 player from
+// a list of players in a Match.
 type Player struct {
-	Id       int `json:"account_id"`
+	ID       int `json:"account_id"`
 	Position int `json:"player_slot"`
 	Hero     int `json:"hero_id"`
 }
 
+// Matches represents a list of detailed matches.
 type Matches []MatchDetails
 
+// MatchDetails represents information about a particular match.
 type MatchDetails struct {
 	Players         []PlayerDetails `json:"players"`
 	RadiantWin      bool            `json:"radiant_win"`
 	Duration        int             `json:"duration"`
 	Start           int             `json:"start_time"`
-	Id              int             `json:"match_id"`
+	ID              int             `json:"match_id"`
 	Sequence        int             `json:"match_seq_num"`
 	RadiantTower    int             `json:"tower_status_radiant"`
 	DireTower       int             `json:"tower_status_dire"`
@@ -59,8 +72,9 @@ type MatchDetails struct {
 	//Drafts          Draft           `json:"picks_ban"`
 }
 
+// PlayerDetails represents information about a player in a particular match.
 type PlayerDetails struct {
-	Id           int       `json:"account_id"`
+	ID           int       `json:"account_id"`
 	Position     int       `json:"player_slot"`
 	Hero         int       `json:"hero_id"`
 	Item0        int       `json:"item_0"`
@@ -86,27 +100,29 @@ type PlayerDetails struct {
 	Abilities    []Ability `json:"ability_upgrades"`
 }
 
+// Ability represents information about a player's ability upgrades
+// (e.g. what, and when an ability was learnt).
 type Ability struct {
-	Id    int `json:"ability"`
+	ID    int `json:"ability"`
 	Time  int `json:"time"`
 	Level int `json:"level"`
 }
 
+// Leagues represents a list of DotaTV-supported leagues.
 type Leagues struct {
 	Leagues []League `json:"leagues"`
 }
 
+// League represents information about a DotaTV-supported league.
 type League struct {
 	Name        string `json:"name"`
-	Id          int    `json:"leagueid"`
+	ID          int    `json:"leagueid"`
 	Description string `json:"description"`
 	URL         string `json:"tournament_url"`
 }
 
-/*
- Returns a list of matches, filterable by various parameters.
- See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
-*/
+// GetMatchHistory returns a list of matches, filterable by various parameters.
+// See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
 func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skill int, heroId int, minPlayers int, leagueId int, startAtMatchId int, limit int, tournamentOnly bool) (MatchHistory, error) {
 	params := url.Values{}
 	params.Set("account_id", strconv.Itoa(accountId))
@@ -133,10 +149,8 @@ func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skil
 	return *history, err
 }
 
-/*
- Returns information about a particular match.
- See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
-*/
+// GetMatchDetails returns information about a particular match.
+// See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
 func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) (MatchDetails, error) {
 	params := url.Values{}
 	params.Set("match_id", strconv.Itoa(matchId))
@@ -147,18 +161,16 @@ func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) (MatchDetails, error
 	return *match, err
 }
 
-/*
- Returns more information about a match using `Match{}`.
- Requires a DOTA2MatchesServices client.
-*/
+// GetDetails returns detailed information about a Match from MatchHistory
+// using GetMatchDetails.
+// It requires a DOTA2MatchesServices client.
 func (m Match) GetDetails(s *DOTA2MatchesServices) (MatchDetails, error) {
-	return s.GetMatchDetails(m.Id)
+	return s.GetMatchDetails(m.ID)
 }
 
-/*
- Returns more information about a match history using `MatchHistory{}`.
- Requires a `DOTA2MatchesServices` client.
-*/
+// GetDetails returns detailed information about Matches in a MatchHistory
+// using using GetDetails.
+// It requires a DOTA2MatchesServices client.
 func (h MatchHistory) GetDetails(s *DOTA2MatchesServices) Matches {
 	history := h.Matches
 	total := len(history)
@@ -185,16 +197,14 @@ func (h MatchHistory) GetDetails(s *DOTA2MatchesServices) Matches {
 	for m := range out {
 		matches = append(matches, m)
 	}
-	sort.Sort(ByMatchId(matches))
+	sort.Sort(ByMatchID(matches))
 	return matches
 }
 
-/*
- Returns a player's team and position using PlayerDetails{}.
- The player's slot is stored as an 8-bit uint: 0 0 0 0 0 0 0 0.
- The first bit (LtR) represents the player's team (i.e. 1 / True = Dire).
- The final 3 bits represents the player's position within a team.
-*/
+// GetPosition returns a player's team, and position from PlayerDetails.
+// The player's slot is stored as an 8-bit uint: 00000000.
+// The first bit (LtR) represents the player's team (i.e. 1 / True = Dire).
+// The final 3 bits represents the player's position within a team.
 func (p PlayerDetails) GetPosition() (bool, int) {
 	isDire := false
 	if (p.Position >> 7) == 1 {
@@ -204,30 +214,25 @@ func (p PlayerDetails) GetPosition() (bool, int) {
 	return isDire, position
 }
 
-/*
- Returns a player's team and position using their account Id.
-*/
-func (m MatchDetails) GetPositionByAccount(aId int32) (bool, int) {
+// GetPositionByAccount returns a player's team, and position
+// using their account ID from MatchDetails.
+func (m MatchDetails) GetPositionByAccount(aid int32) (bool, int) {
 	isDire, pos := false, 0
 	for _, p := range m.Players {
-		if aId == int32(p.Id) {
+		if aid == int32(p.ID) {
 			return p.GetPosition()
 		}
 	}
 	return isDire, pos
 }
 
-/*
- Returns a 32-bit Steam community Id from a 64-bit account Id
-*/
-func CommunityId(aId int64) int32 {
-	return int32(aId)
+// CommunityID returns a 32-bit Steam community ID from a 64-bit account ID.
+func CommunityID(aid int64) int32 {
+	return int32(aid)
 }
 
-/*
- Returns information about DotaTV-supported leagues.
- See https://wiki.teamfortress.com/wiki/WebAPI/GetLeagueListing for more information.
-*/
+// GetLeagueListing returns information about DotaTV-supported leagues.
+// See https://wiki.teamfortress.com/wiki/WebAPI/GetLeagueListing for more information.
 func (s *DOTA2MatchesServices) GetLeagueListing() (Leagues, error) {
 	leagues := new(Leagues)
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetLeagueListing/v1", nil, leagues)
