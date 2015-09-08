@@ -64,8 +64,8 @@ func GetTournamentPrizePool(c *cli.Context) {
 }
 
 func GetMatchHistory(c *cli.Context) {
-	accountId := c.Int("accountId")
-	history, err := client.DOTA2Matches.GetMatchHistory(accountId, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
+	accountID := c.Int("accountID")
+	history, err := client.DOTA2Matches.GetMatchHistory(accountID, c.Int("gameMode"), c.Int("skill"), c.Int("heroID"), c.Int("minPlayers"), c.Int("leagueID"), c.Int("startAtMatchID"), c.Int("limit"), c.Bool("tournamentOnly"))
 	failOnError(err)
 
 	if c.Bool("summary") {
@@ -73,7 +73,7 @@ func GetMatchHistory(c *cli.Context) {
 		matches := history.GetDetails(client.DOTA2Matches)
 
 		for _, match := range matches {
-			if accountId == 0 {
+			if accountID == 0 {
 				if match.RadiantWin {
 					result += "R"
 				} else {
@@ -82,7 +82,7 @@ func GetMatchHistory(c *cli.Context) {
 				continue
 			}
 
-			isDire, _ := match.GetPositionByAccount(int32(accountId))
+			isDire, _ := match.GetPositionByAccount(int32(accountID))
 			if match.RadiantWin && !isDire {
 				result += "W"
 			} else if !match.RadiantWin && isDire {
@@ -107,7 +107,7 @@ func main() {
 			Aliases: []string{"h"},
 			Usage:   "Returns a list of heroes within Dota 2",
 			Flags: []cli.Flag{
-				cli.BoolFlag{Name: "json", Usage: "Encodes and dumps data in JSON"},
+				cli.BoolFlag{Name: "json", Usage: "Encodes, and dumps data in JSON"},
 			},
 			Action: GetHeroes,
 		},
@@ -116,7 +116,7 @@ func main() {
 			Aliases: []string{"l"},
 			Usage:   "Returns information about DotaTV-supported leagues",
 			Flags: []cli.Flag{
-				cli.BoolFlag{Name: "json", Usage: "Encodes and dumps data in JSON"},
+				cli.BoolFlag{Name: "json", Usage: "Encodes, and dumps data in JSON"},
 			},
 			Action: GetLeagueListing,
 		},
@@ -134,7 +134,7 @@ func main() {
 			Aliases: []string{"mh"},
 			Usage:   "Returns a list of matches, filterable by various parameters",
 			Flags: []cli.Flag{
-				cli.IntFlag{Name: "accountId", Value: 0, Usage: "32-bit account ID"},
+				cli.IntFlag{Name: "accountID", Value: 0, Usage: "32-bit account ID"},
 				cli.IntFlag{Name: "gameMode", Value: 0, Usage: "Game mode"},
 				cli.IntFlag{Name: "skill", Value: 0, Usage: "Skill bracket for matches"},
 				cli.IntFlag{Name: "heroID", Value: 0, Usage: "A list of hero IDs can be found via the GetHeroes method"},
