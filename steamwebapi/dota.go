@@ -13,11 +13,13 @@ type DOTA2Services struct {
 	client *Client
 }
 
+// Heroes represents a list of heroes within Dota 2
 type Heroes struct {
 	Heroes []Hero `json:"heroes"`
 	Count  int    `json:"count"`
 }
 
+// Hero represents information about a single hero.
 type Hero struct {
 	Name          string `json:"name"`
 	ID            int    `json:"id"`
@@ -34,9 +36,9 @@ func (s *DOTA2Services) GetHeroes() (Heroes, error) {
 
 // GetTournamentPrizePool returns the current prize pool for specific tournaments.
 // See https://wiki.teamfortress.com/wiki/WebAPI/GetTournamentPrizePool for more information.
-func (s *DOTA2Services) GetTournamentPrizePool(leagueId int) (float64, error) {
+func (s *DOTA2Services) GetTournamentPrizePool(leagueID int) (float64, error) {
 	params := url.Values{}
-	params.Set("leagueid", strconv.Itoa(leagueId))
+	params.Set("leagueid", strconv.Itoa(leagueID))
 
 	var data map[string]interface{}
 	_, err := s.client.Get(baseDOTA2Endpoint+"/GetTournamentPrizePool/v1", params, &data)

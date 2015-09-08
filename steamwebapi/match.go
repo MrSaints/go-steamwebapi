@@ -123,15 +123,15 @@ type League struct {
 
 // GetMatchHistory returns a list of matches, filterable by various parameters.
 // See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchHistory for more information.
-func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skill int, heroId int, minPlayers int, leagueId int, startAtMatchId int, limit int, tournamentOnly bool) (MatchHistory, error) {
+func (s *DOTA2MatchesServices) GetMatchHistory(accountID int, gameMode int, skill int, heroID int, minPlayers int, leagueID int, startAtMatchID int, limit int, tournamentOnly bool) (MatchHistory, error) {
 	params := url.Values{}
-	params.Set("account_id", strconv.Itoa(accountId))
+	params.Set("account_id", strconv.Itoa(accountID))
 	params.Set("game_mode", strconv.Itoa(gameMode))
 	params.Set("skill", strconv.Itoa(skill))
-	params.Set("hero_id", strconv.Itoa(heroId))
+	params.Set("hero_id", strconv.Itoa(heroID))
 	params.Set("min_players", strconv.Itoa(minPlayers))
-	params.Set("league_id", strconv.Itoa(leagueId))
-	params.Set("start_at_match_id", strconv.Itoa(startAtMatchId))
+	params.Set("league_id", strconv.Itoa(leagueID))
+	params.Set("start_at_match_id", strconv.Itoa(startAtMatchID))
 
 	if limit > 0 {
 		params.Set("matches_requested", strconv.Itoa(limit))
@@ -151,9 +151,9 @@ func (s *DOTA2MatchesServices) GetMatchHistory(accountId int, gameMode int, skil
 
 // GetMatchDetails returns information about a particular match.
 // See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails for more information.
-func (s *DOTA2MatchesServices) GetMatchDetails(matchId int) (MatchDetails, error) {
+func (s *DOTA2MatchesServices) GetMatchDetails(matchID int) (MatchDetails, error) {
 	params := url.Values{}
-	params.Set("match_id", strconv.Itoa(matchId))
+	params.Set("match_id", strconv.Itoa(matchID))
 
 	match := new(MatchDetails)
 	_, err := s.client.Get(baseDOTA2MatchEndpoint+"/GetMatchDetails/v1", params, match)

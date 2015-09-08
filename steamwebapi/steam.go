@@ -30,6 +30,7 @@ type Client struct {
 	DOTA2Matches *DOTA2MatchesServices
 }
 
+// Result represents the data returned from a successful API call.
 type Result struct {
 	Data interface{} `json:"result"`
 }
