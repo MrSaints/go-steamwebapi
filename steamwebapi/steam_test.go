@@ -1,9 +1,5 @@
 package steamwebapi
 
-import (
-//"testing"
-)
-
 var (
 	client *Client
 )

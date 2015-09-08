@@ -20,7 +20,7 @@ func BenchmarkGetMatchDetails(b *testing.B) {
 	}
 }
 
-func BenchmarkMatchHistoryGetDetails(b *testing.B) {
+func BenchmarkMatchHistory_GetDetails(b *testing.B) {
 	setup()
 	history := client.DOTA2Matches.GetMatchHistory(47724064, 0, 0, 0, 0, 0, 0, 0, false)
 	b.ResetTimer()
@@ -29,7 +29,7 @@ func BenchmarkMatchHistoryGetDetails(b *testing.B) {
 	}
 }
 
-func BenchmarkMatchDetailsGetPosition(b *testing.B) {
+func BenchmarkMatchDetails_GetPositionByAccount(b *testing.B) {
 	setup()
 	match := client.DOTA2Matches.GetMatchDetails(714452368)
 	b.ResetTimer()
