@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/MrSaints/go-steamwebapi/steamwebapi?status.svg)](https://godoc.org/github.com/MrSaints/go-steamwebapi/steamwebapi)
 
 
-A simple and idiomatic Go package for programmatically working with [Steam's Web API][] (particularly its [Dota 2 Web API][]).
+A simple, and idiomatic Go package for programmatically working with [Steam's Web API][] (particularly its [Dota 2 Web API][]).
 
 This library's design was inspired by [go-github][].
 
